@@ -1,6 +1,6 @@
 export default async (req, context) => {
-  const query = context.queryStringParameters || {};
-  const slug_id = query.slug_id;
+  const url = new URL(req.url);
+  const slug_id = url.searchParams.get('slug_id');
 
   if (!slug_id) {
     return new Response(
