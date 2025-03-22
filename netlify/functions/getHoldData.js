@@ -1,39 +1,35 @@
-export default async (req, context) => {
-  const url = new URL(req.url);
-  const slug_id = url.searchParams.get('slug_id');
+// Hent slug_id fra URL'en
+const urlParams = new URLSearchParams(window.location.search);
+const slugId = urlParams.get("slug_id");
 
-  if (!slug_id) {
-    return new Response(
-      JSON.stringify({ error: "slug_id mangler i URL'en 🙃" }),
-      {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+if (!slugId) {
+  document.body.innerHTML = "<p>❌ Mangler slug_id i URL'en</p>";
+} else {
+  fetch(`/.netlify/functions/getHoldData?slug_id=${slugId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.error) {
+        document.body.innerHTML = `<p>❌ Fejl: ${data.error}</p>`;
+        return;
       }
-    );
-  }
 
-  try {
-    const response = await fetch(`https://hook.eu2.make.com/t2sx95vvn9guk0wvlopopzrafclcnexu?slug_id=${slug_id}`);
-    const data = await response.json();
+      const html = `
+        <h1>${data.team_name}</h1>
+        <p>${data.description}</p>
+        <ul>
+          <li><strong>Dato:</strong> ${new Date(data.datetime).toLocaleString("da-DK")}</li>
+          <li><strong>Instruktør:</strong> ${data.instructor_name}</li>
+          <li><strong>Email:</strong> ${data.instructor_email}</li>
+          <li><strong>Pris:</strong> ${data.price} kr.</li>
+          <li><strong>Status:</strong> ${data.status}</li>
+          <li><strong>Max deltagere:</strong> ${data.max_participants}</li>
+        </ul>
+      `;
 
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
+      document.body.innerHTML = html;
+    })
+    .catch((error) => {
+      console.error("Noget gik galt:", error);
+      document.body.innerHTML = "<p>❌ Kunne ikke hente data.</p>";
     });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: "Noget gik galt 😵" }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-  }
-};
+}
