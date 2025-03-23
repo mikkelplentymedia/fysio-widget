@@ -1,4 +1,5 @@
 const Airtable = require("airtable");
+
 const base = new Airtable({ apiKey: process.env.AIRTABLE_ACCESS_TOKEN }).base(process.env.AIRTABLE_BASE_ID);
 
 exports.handler = async function (event, context) {
@@ -7,6 +8,10 @@ exports.handler = async function (event, context) {
   if (!recordId) {
     return {
       statusCode: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
       body: JSON.stringify({ error: "❌ Mangler recordId i URL" }),
     };
   }
@@ -16,6 +21,10 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
       body: JSON.stringify({
         team_name: record.fields["Team name"] || "",
         description: record.fields["Beskrivelse"] || "",
@@ -33,6 +42,10 @@ exports.handler = async function (event, context) {
     console.error("Fejl ved hentning:", error);
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
       body: JSON.stringify({ error: "Kunne ikke hente data fra Airtable." }),
     };
   }
