@@ -1,5 +1,4 @@
 const Airtable = require("airtable");
-
 const base = new Airtable({ apiKey: process.env.AIRTABLE_ACCESS_TOKEN }).base(process.env.AIRTABLE_BASE_ID);
 
 exports.handler = async function (event, context) {
@@ -13,7 +12,7 @@ exports.handler = async function (event, context) {
   }
 
   try {
-    const record = await base("Hold").find(recordId);
+    const record = await base("Team").find(recordId);
 
     return {
       statusCode: 200,
