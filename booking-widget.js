@@ -19,40 +19,33 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
+    // Byg billedgalleri
     const pictures = data.pictures || [];
     let galleryHTML = "";
-    let lightboxScripts = "";
 
     if (pictures.length > 0) {
       const firstImage = pictures[0].url;
-      const otherImages = pictures.slice(1, 3); // max 2
+      const otherImages = pictures.slice(1, 3); // maks 2 billeder til højre
 
       galleryHTML += `
-        <div class="gallery-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; padding: 0 64px 32px 64px;">
-          <div class="gallery-main" style="aspect-ratio: 1 / 1; width: 100%; overflow: hidden; border-radius: 8px; position: relative;">
+        <div class="gallery-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; padding: 0 64px 32px 64px; align-items: stretch;">
+          <div class="gallery-main" style="aspect-ratio: 1 / 1; height: 100%; width: 100%; overflow: hidden; border-radius: 8px; position: relative;">
             <img src="${firstImage}" data-full="${firstImage}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 8px; cursor: pointer;" />
           </div>
-          <div class="gallery-side" style="display: flex; flex-direction: column; gap: 10px; height: 100%;">
-            ${otherImages
-              .map(
-                (img) => `
-                <div style="aspect-ratio: 1 / 1; width: 100%; overflow: hidden; flex: 1; border-radius: 8px;">
-                  <img src="${img.url}" data-full="${img.url}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 8px; cursor: pointer;" />
-                </div>
-              `
-              )
-              .join("")}
-          </div>
-        </div>
+          <div class="gallery-side" style="display: flex; flex-direction: column; gap: 10px;">
       `;
 
-      lightboxScripts = `
-        <div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:9999;">
-          <img id="lightbox-img" src="" style="max-width:90%; max-height:90%; border-radius:10px;" />
-        </div>
-      `;
+      otherImages.forEach((img) => {
+        galleryHTML += `
+          <div style="aspect-ratio: 1 / 1; width: 100%; overflow: hidden; border-radius: 8px; position: relative;">
+            <img src="${img.url}" data-full="${img.url}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 8px; cursor: pointer;" />
+          </div>`;
+      });
+
+      galleryHTML += `</div></div>`;
     }
 
+    // Byg info-boksen
     const infoHTML = `
       <div style="font-family: sans-serif; border:1px solid #ccc; padding:20px 64px; border-radius:8px;">
         <h2>${data.team_name}</h2>
@@ -65,23 +58,41 @@ document.addEventListener("DOMContentLoaded", async function () {
       </div>
     `;
 
-    container.innerHTML = galleryHTML + infoHTML + lightboxScripts;
+    // Lightbox-styling + funktion
+    const lightboxScript = `
+      <style>
+        .lightbox-backdrop {
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.85);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+        }
+        .lightbox-backdrop img {
+          max-width: 90%;
+          max-height: 90%;
+          border-radius: 8px;
+        }
+      </style>
+      <script>
+        document.querySelectorAll("#hold-booking-widget img[data-full]").forEach(img => {
+          img.addEventListener("click", () => {
+            const backdrop = document.createElement("div");
+            backdrop.className = "lightbox-backdrop";
+            const fullImg = document.createElement("img");
+            fullImg.src = img.getAttribute("data-full");
+            backdrop.appendChild(fullImg);
+            backdrop.addEventListener("click", () => backdrop.remove());
+            document.body.appendChild(backdrop);
+          });
+        });
+      </script>
+    `;
 
-    // Nu virker klik
-    const images = container.querySelectorAll("img[data-full]");
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightbox-img");
-
-    images.forEach((img) => {
-      img.addEventListener("click", () => {
-        lightboxImg.src = img.dataset.full;
-        lightbox.style.display = "flex";
-      });
-    });
-
-    lightbox.addEventListener("click", () => {
-      lightbox.style.display = "none";
-    });
+    // Kombinér og vis
+    container.innerHTML = galleryHTML + infoHTML + lightboxScript;
   } catch (error) {
     console.error("Fejl:", error);
     container.innerHTML = "<p>❌ Kunne ikke hente holdoplysninger.</p>";
