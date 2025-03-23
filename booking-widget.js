@@ -24,22 +24,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (pictures.length > 0) {
       const firstImage = pictures[0].url;
-      const otherImages = pictures.slice(1, 3); // max 2 i højre kolonne
+      const otherImages = pictures.slice(1, 3);
 
       galleryHTML += `
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; padding: 0 64px 32px 64px;">
-          <div style="width: 100%; aspect-ratio: 4/3; overflow: hidden; border-radius: 8px;">
-            <img src="${firstImage}" alt="Galleri billede" 
-              style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" 
+          <div style="aspect-ratio: 1/1; overflow: hidden; border-radius: 8px; position: relative;">
+            <img src="${firstImage}" alt="Galleri billede"
+              style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"
               onclick="openLightbox('${firstImage}')" />
           </div>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             ${otherImages
               .map(
                 (img) => `
-                <div style="width: 100%; aspect-ratio: 1/1; overflow: hidden; border-radius: 8px;">
+                <div style="aspect-ratio: 1/1; overflow: hidden; border-radius: 8px; position: relative;">
                   <img src="${img.url}" alt="Galleri billede"
-                    style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" 
+                    style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"
                     onclick="openLightbox('${img.url}')" />
                 </div>
               `
