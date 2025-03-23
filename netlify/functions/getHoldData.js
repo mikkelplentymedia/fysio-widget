@@ -1,35 +1,39 @@
-// Hent slug_id fra URL'en
-const urlParams = new URLSearchParams(window.location.search);
-const slugId = urlParams.get("slug_id");
+const Airtable = require("airtable");
+const base = new Airtable({ apiKey: process.env.AIRTABLE_ACCESS_TOKEN }).base(process.env.AIRTABLE_BASE_ID);
 
-if (!slugId) {
-  document.body.innerHTML = "<p>❌ Mangler slug_id i URL'en</p>";
-} else {
-  fetch(`/.netlify/functions/getHoldData?slug_id=${slugId}`)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) {
-        document.body.innerHTML = `<p>❌ Fejl: ${data.error}</p>`;
-        return;
-      }
+exports.handler = async function (event, context) {
+  const recordId = event.queryStringParameters.recordId;
 
-      const html = `
-        <h1>${data.team_name}</h1>
-        <p>${data.description}</p>
-        <ul>
-          <li><strong>Dato:</strong> ${new Date(data.datetime).toLocaleString("da-DK")}</li>
-          <li><strong>Instruktør:</strong> ${data.instructor_name}</li>
-          <li><strong>Email:</strong> ${data.instructor_email}</li>
-          <li><strong>Pris:</strong> ${data.price} kr.</li>
-          <li><strong>Status:</strong> ${data.status}</li>
-          <li><strong>Max deltagere:</strong> ${data.max_participants}</li>
-        </ul>
-      `;
+  if (!recordId) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "❌ Mangler recordId i URL" }),
+    };
+  }
 
-      document.body.innerHTML = html;
-    })
-    .catch((error) => {
-      console.error("Noget gik galt:", error);
-      document.body.innerHTML = "<p>❌ Kunne ikke hente data.</p>";
-    });
-}
+  try {
+    const record = await base("Hold").find(recordId);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        team_name: record.fields["Team name"] || "",
+        description: record.fields["Beskrivelse"] || "",
+        datetime: `${record.fields["Date/time"] || ""}`,
+        instructor_name: record.fields["Name (from Instructor)"] || "",
+        instructor_email: record.fields["Email (from Instructor)"] || "",
+        instructor_active: record.fields["Active (from Instructor)"] || "",
+        max_participants: record.fields["Max participants"] || "",
+        price: record.fields["Price"] || "",
+        status: record.fields["Status"] || "",
+        participants: record.fields["Participants"] || [],
+      }),
+    };
+  } catch (error) {
+    console.error("Fejl ved hentning:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Kunne ikke hente data fra Airtable." }),
+    };
+  }
+};
