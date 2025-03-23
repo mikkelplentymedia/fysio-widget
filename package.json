@@ -1,0 +1,10 @@
+{
+  "name": "fysio-widget",
+  "version": "1.0.0",
+  "description": "Serverless widget projekt",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "airtable": "^0.11.1"
+  }
+}
