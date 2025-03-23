@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     widget.innerHTML = `
-      <div style="font-family:sans-serif; border:1px solid #ccc; padding:20px; border-radius:8px;">
+      <div style="font-family:sans-serif; border:0px solid #ccc; padding:20px; border-radius:8px;">
         <h2>${data.team_name}</h2>
         <p><strong>Dato:</strong> ${new Date(data.datetime).toLocaleString("da-DK")}</p>
         <p><strong>Instruktør:</strong> ${data.instructor_name}</p>
