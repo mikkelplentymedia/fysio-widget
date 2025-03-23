@@ -19,29 +19,25 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
 
-    // Billedgalleri
     const pictures = data.pictures || [];
     let galleryHTML = "";
+    let lightboxScripts = "";
 
     if (pictures.length > 0) {
       const firstImage = pictures[0].url;
-      const otherImages = pictures.slice(1, 3); // maks 2 ekstra
+      const otherImages = pictures.slice(1, 3); // max 2
 
       galleryHTML += `
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; padding: 0 64px 32px 64px;">
-          <div style="aspect-ratio: 1 / 1; width: 100%; overflow: hidden; border-radius: 8px; position: relative;">
-            <img src="${firstImage}" alt="Galleri billede"
-              style="width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 8px; cursor: pointer;"
-              onclick="openLightbox('${firstImage}')" />
+        <div class="gallery-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; padding: 0 64px 32px 64px;">
+          <div class="gallery-main" style="aspect-ratio: 1 / 1; width: 100%; overflow: hidden; border-radius: 8px; position: relative;">
+            <img src="${firstImage}" data-full="${firstImage}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 8px; cursor: pointer;" />
           </div>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="gallery-side" style="display: flex; flex-direction: column; gap: 10px; height: 100%;">
             ${otherImages
               .map(
                 (img) => `
-                <div style="aspect-ratio: 1 / 1; width: 100%; overflow: hidden; border-radius: 8px;">
-                  <img src="${img.url}" alt="Galleri billede"
-                    style="width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 8px; cursor: pointer;"
-                    onclick="openLightbox('${img.url}')" />
+                <div style="aspect-ratio: 1 / 1; width: 100%; overflow: hidden; flex: 1; border-radius: 8px;">
+                  <img src="${img.url}" data-full="${img.url}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 8px; cursor: pointer;" />
                 </div>
               `
               )
@@ -49,9 +45,14 @@ document.addEventListener("DOMContentLoaded", async function () {
           </div>
         </div>
       `;
+
+      lightboxScripts = `
+        <div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:9999;">
+          <img id="lightbox-img" src="" style="max-width:90%; max-height:90%; border-radius:10px;" />
+        </div>
+      `;
     }
 
-    // Holdoplysninger
     const infoHTML = `
       <div style="font-family: sans-serif; border:1px solid #ccc; padding:20px 64px; border-radius:8px;">
         <h2>${data.team_name}</h2>
@@ -64,29 +65,23 @@ document.addEventListener("DOMContentLoaded", async function () {
       </div>
     `;
 
-    // Lightbox container
-    const lightboxHTML = `
-      <div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:9999;">
-        <img id="lightbox-img" src="" style="max-width:90%; max-height:90%; border-radius:10px;" />
-      </div>
-      <script>
-        function openLightbox(src) {
-          const lightbox = document.getElementById("lightbox");
-          const img = document.getElementById("lightbox-img");
-          img.src = src;
-          lightbox.style.display = "flex";
-        }
+    container.innerHTML = galleryHTML + infoHTML + lightboxScripts;
 
-        document.addEventListener("click", function(e) {
-          if (e.target.id === "lightbox") {
-            e.target.style.display = "none";
-          }
-        });
-      </script>
-    `;
+    // Nu virker klik
+    const images = container.querySelectorAll("img[data-full]");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
 
-    // Vis alt
-    container.innerHTML = galleryHTML + infoHTML + lightboxHTML;
+    images.forEach((img) => {
+      img.addEventListener("click", () => {
+        lightboxImg.src = img.dataset.full;
+        lightbox.style.display = "flex";
+      });
+    });
+
+    lightbox.addEventListener("click", () => {
+      lightbox.style.display = "none";
+    });
   } catch (error) {
     console.error("Fejl:", error);
     container.innerHTML = "<p>❌ Kunne ikke hente holdoplysninger.</p>";
