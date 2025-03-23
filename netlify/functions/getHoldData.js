@@ -35,6 +35,7 @@ exports.handler = async function (event, context) {
         max_participants: record.fields["Max participants"] || "",
         price: record.fields["Price"] || "",
         status: record.fields["Status"] || "",
+        pictures: record.fields["Pictures"] || [],
         participants: record.fields["Participants"] || [],
       }),
     };
