@@ -24,21 +24,25 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (pictures.length > 0) {
       const firstImage = pictures[0].url;
-      const otherImages = pictures.slice(1, 3); // 2 ekstra
+      const otherImages = pictures.slice(1, 3); // max 2 i højre kolonne
 
       galleryHTML += `
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; padding: 0 64px 32px 64px;">
-          <div style="overflow: hidden; border-radius: 8px;">
-            <img src="${firstImage}" alt="Galleri billede" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: pointer;" onclick="openLightbox('${firstImage}')" />
+          <div style="width: 100%; aspect-ratio: 4/3; overflow: hidden; border-radius: 8px;">
+            <img src="${firstImage}" alt="Galleri billede" 
+              style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" 
+              onclick="openLightbox('${firstImage}')" />
           </div>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             ${otherImages
               .map(
                 (img) => `
-              <div style="overflow: hidden; border-radius: 8px;">
-                <img src="${img.url}" alt="Galleri billede" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: pointer;" onclick="openLightbox('${img.url}')" />
-              </div>
-            `
+                <div style="width: 100%; aspect-ratio: 1/1; overflow: hidden; border-radius: 8px;">
+                  <img src="${img.url}" alt="Galleri billede"
+                    style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" 
+                    onclick="openLightbox('${img.url}')" />
+                </div>
+              `
               )
               .join("")}
           </div>
@@ -59,10 +63,23 @@ document.addEventListener("DOMContentLoaded", async function () {
     `;
 
     const lightboxHTML = `
-      <div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
-        <img id="lightbox-img" src="" style="max-width:90%; max-height:90%; border-radius:8px;" />
-        <span onclick="closeLightbox()" style="position:absolute; top:20px; right:30px; color:white; font-size:2em; cursor:pointer;">&times;</span>
+      <div id="lightbox-modal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.8); justify-content:center; align-items:center;">
+        <img id="lightbox-image" src="" style="max-width:90%; max-height:90%; border-radius:10px;" />
       </div>
+      <script>
+        window.openLightbox = function(url) {
+          const modal = document.getElementById("lightbox-modal");
+          const image = document.getElementById("lightbox-image");
+          image.src = url;
+          modal.style.display = "flex";
+        };
+        document.addEventListener("click", function(e) {
+          const modal = document.getElementById("lightbox-modal");
+          if (e.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+      </script>
     `;
 
     container.innerHTML = galleryHTML + infoHTML + lightboxHTML;
@@ -71,15 +88,3 @@ document.addEventListener("DOMContentLoaded", async function () {
     container.innerHTML = "<p>❌ Kunne ikke hente holdoplysninger.</p>";
   }
 });
-
-// Lightbox-funktioner
-window.openLightbox = function (imgUrl) {
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = document.getElementById("lightbox-img");
-  lightboxImg.src = imgUrl;
-  lightbox.style.display = "flex";
-};
-
-window.closeLightbox = function () {
-  document.getElementById("lightbox").style.display = "none";
-};
