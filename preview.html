@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hold Preview</title>
+  </head>
+  <body>
+    <div id="hold-booking-widget"></div>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const recordId = urlParams.get("recordId");
+      const container = document.getElementById("hold-booking-widget");
+      if (recordId && container) {
+        container.setAttribute("data-recordid", recordId);
+      }
+    </script>
+    <script src="booking-widget.js"></script>
+  </body>
+</html>
